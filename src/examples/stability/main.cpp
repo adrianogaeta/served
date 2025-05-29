@@ -21,7 +21,9 @@
  */
 
 #include <served/served.hpp>
+#ifndef _WIN32
 #include <unistd.h>
+#endif	// #ifndef _WIN32
 
 /* stability example
  *

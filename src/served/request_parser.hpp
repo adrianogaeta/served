@@ -25,6 +25,12 @@
 
 #include <sys/types.h> // size_t
 
+#ifdef _MSC_VER
+ // DELETE is also defined as a macro in winnt.h, included through boost::asio
+#pragma push_macro("ERROR")
+#undef ERROR
+#endif // _MSC_VER
+
 namespace served {
 
 /*
@@ -199,5 +205,9 @@ public:
 };
 
 } // served namespace
+
+#ifdef _MSC_VER
+#pragma pop_macro("ERROR")
+#endif // _MSC_VER
 
 #endif // SERVED_REQUEST_PARSER_HPP

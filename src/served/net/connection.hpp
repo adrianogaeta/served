@@ -24,7 +24,6 @@
 #define SERVED_CONNECTION_HPP
 
 #include <boost/asio.hpp>
-
 #include <served/multiplexer.hpp>
 #include <served/response.hpp>
 #include <served/request.hpp>
@@ -49,7 +48,7 @@ public:
 	enum status_type { READING = 0, DONE };
 
 private:
-	boost::asio::io_service &    _io_service;
+	boost::asio::io_context &    _io_context;
 	status_type                  _status;
 	boost::asio::ip::tcp::socket _socket;
 	connection_manager &         _connection_manager;
@@ -80,7 +79,7 @@ public:
 	 * @param read_timer the timeout for reading, 0 is ignored
 	 * @param write_timer the timeout for writing, 0 is ignored
 	 */
-	explicit connection( boost::asio::io_service &    io_service
+	explicit connection( boost::asio::io_context &    io_service
 	                   , boost::asio::ip::tcp::socket socket
 	                   , connection_manager &         manager
 	                   , multiplexer        &         handler

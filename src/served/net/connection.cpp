@@ -28,10 +28,16 @@
 #include <utility>
 #include <vector>
 
+#ifdef _MSC_VER
+ // DELETE is also defined as a macro in winnt.h, included through boost::asio
+#pragma push_macro("ERROR")
+#undef ERROR
+#endif // _MSC_VER
+
 using namespace served;
 using namespace served::net;
 
-connection::connection( boost::asio::io_service &    io_service
+connection::connection( boost::asio::io_context &    io_service
                       , boost::asio::ip::tcp::socket socket
                       , connection_manager &         manager
                       , multiplexer        &         handler
@@ -39,7 +45,7 @@ connection::connection( boost::asio::io_service &    io_service
                       , int                          read_timeout
                       , int                          write_timeout
                       )
-	: _io_service(io_service)
+	: _io_context(io_service)
 	, _status(status_type::READING)
 	, _socket(std::move(socket))
 	, _connection_manager(manager)
@@ -49,8 +55,8 @@ connection::connection( boost::asio::io_service &    io_service
 	, _write_timeout(write_timeout)
 	, _request()
 	, _request_parser(_request, _max_req_size_bytes)
-	, _read_timer(_io_service, boost::posix_time::milliseconds(read_timeout))
-	, _write_timer(_io_service, boost::posix_time::milliseconds(write_timeout))
+	, _read_timer(_io_context, boost::posix_time::milliseconds(read_timeout))
+	, _write_timer(_io_context, boost::posix_time::milliseconds(write_timeout))
 {}
 
 void
@@ -210,3 +216,7 @@ connection::do_write()
 		}
 	);
 }
+
+#ifdef _MSC_VER
+#pragma pop_macro("ERROR")
+#endif // _MSC_VER

@@ -33,11 +33,11 @@ server::server( const std::string & address
               , multiplexer       & mux
               , bool              register_signals /* = true */
               )
-	: _io_service()
-	, _signals(_io_service)
-	, _acceptor(_io_service)
+	: _io_context()
+	, _signals(_io_context)
+	, _acceptor(_io_context)
 	, _connection_manager()
-	, _socket(_io_service)
+	, _socket(_io_context)
 	, _request_handler(mux)
 	, _read_timeout(0)
 	, _write_timeout(0)
@@ -59,8 +59,9 @@ server::server( const std::string & address
 	do_await_stop();
 
 	// Open the acceptor with the option to reuse the address (i.e. SO_REUSEADDR).
-	boost::asio::ip::tcp::resolver resolver(_io_service);
-	boost::asio::ip::tcp::endpoint endpoint = *resolver.resolve({address, port});
+	boost::asio::ip::tcp::resolver resolver(_io_context);
+	auto endpoints = resolver.resolve(address, port);
+	boost::asio::ip::tcp::endpoint endpoint = *endpoints.begin();
 
 	_acceptor.open(endpoint.protocol());
 	_acceptor.set_option(boost::asio::ip::tcp::acceptor::reuse_address(true));
@@ -75,9 +76,9 @@ server::~server()
 	_acceptor.close();
 	_connection_manager.stop_all();
 
-	if ( ! _io_service.stopped() )
+	if ( ! _io_context.stopped() )
 	{
-		_io_service.stop();
+		_io_context.stop();
 	}
 
 	if ( _threads.size() > 0 ) {
@@ -108,8 +109,8 @@ server::run(int n_threads /* = 1 */, bool block /* = true */)
 		for ( int i = 0; i < 1; i++ )
 		{
 			_threads.push_back(std::thread(
-					std::bind(static_cast<size_t(boost::asio::io_service::*)()>(
-						&boost::asio::io_service::run), std::ref(_io_service))));
+					std::bind(static_cast<size_t(boost::asio::io_context::*)()>(
+						&boost::asio::io_context::run), std::ref(_io_context))));
 		}
 		for ( auto & thread : _threads )
 		{
@@ -128,7 +129,7 @@ server::run(int n_threads /* = 1 */, bool block /* = true */)
 	}
 	else
 	{
-		_io_service.run();
+		_io_context.run();
 	}
 }
 
@@ -153,9 +154,9 @@ server::set_max_request_bytes(size_t num_bytes)
 void
 server::stop()
 {
-	if ( ! _io_service.stopped() )
+	if ( ! _io_context.stopped() )
 	{
-		_io_service.stop();
+		_io_context.stop();
 	}
 }
 
@@ -173,7 +174,7 @@ server::do_accept()
 			if (!ec)
 			{
 				_connection_manager.start(
-					std::make_shared<connection>( _io_service
+					std::make_shared<connection>( _io_context
 					                            , std::move(_socket)
 					                            , _connection_manager
 					                            , _request_handler

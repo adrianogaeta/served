@@ -20,8 +20,13 @@
  * SOFTWARE.
  */
 
+#include <chrono>
+#include <thread>
+
 #include <served/served.hpp>
+#ifndef _WIN32
 #include <unistd.h>
+#endif	// #ifndef _WIN32
 
 /* hello_world_no_blocking example
  *
@@ -47,7 +52,7 @@ int main(int, char const**)
 	while (j < 6) {
 	  std::cout << "Sleeping: " << j << std::endl;
 	  j += 1;
-	  sleep(1);
+	  std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 	}
 
 	std::cout << "Time to stop the server" << std::endl;

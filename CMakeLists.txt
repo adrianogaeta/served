@@ -21,7 +21,10 @@
 #
 # Project Properties
 #
-CMAKE_MINIMUM_REQUIRED (VERSION 2.6.2)
+CMAKE_MINIMUM_REQUIRED (VERSION 3.5)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 PROJECT (served)
 SET (APPLICATION_NAME "Served HTTP REST Library")
 SET (APPLICATION_CODENAME "${PROJECT_NAME}")
@@ -77,13 +80,18 @@ FIND_PACKAGE (RAGEL)
 
 FIND_PACKAGE (Threads)
 
-INCLUDE (EnableStdCXX11)
-ENABLE_STDCXX11 ()
+#INCLUDE (EnableStdCXX11)
+#ENABLE_STDCXX11 ()
 
 #
 # Enable warnings
 #
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wno-missing-field-initializers")
+IF (MSVC)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+    ADD_DEFINITIONS( /D_WIN32_WINNT=0x0601 )
+ELSE ( )
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -Wno-missing-field-initializers")
+ENDIF (MSVC)
 
 #
 # Configure Files

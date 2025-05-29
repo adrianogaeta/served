@@ -2,6 +2,7 @@
 src/served/version.hpp
 *.o
 build
+__cmake
 
 # Hideous eclipse
 .autotools

@@ -24,10 +24,22 @@
 #define SERVER_HPP
 
 #include <boost/asio.hpp>
+
+#ifdef _WIN32
+// fix ERROR macro in <windows.h>
+#pragma push_macro("ERROR")
+#undef ERROR
+#endif	// #ifdef _WIN32
+
 #include <string>
 #include <thread>
 #include <served/net/connection_manager.hpp>
 #include <served/multiplexer.hpp>
+
+#ifdef _WIN32
+#pragma pop_macro("ERROR")
+
+#endif	// #ifdef _WIN32
 
 namespace served { namespace net {
 
@@ -41,7 +53,7 @@ namespace served { namespace net {
  */
 class server
 {
-	boost::asio::io_service        _io_service;
+	boost::asio::io_context        _io_context;
 	boost::asio::signal_set        _signals;
 	boost::asio::ip::tcp::acceptor _acceptor;
 	connection_manager             _connection_manager;
